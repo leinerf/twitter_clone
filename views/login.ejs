@@ -1,0 +1,137 @@
+<% include partials/login-header%>
+
+
+<div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+    	<div class="container"  style="padding: 5%;">
+    		<div id="fields-taken">
+    			
+    		</div>
+    		<h5>Registration Form</h5>
+    		<hr>
+    		<form id="register-form">
+				<div class="form-group">
+			    	<label for="exampleInputUserName">Username</label>
+			    	<input type="text" name="username"  class="form-control" id="registerUserName" aria-describedby="usernameHelp" placeholder="Enter username" required>
+			    	<small id="usernameHelp" class="form-text text-muted">How do you want people to find you</small>
+			 	</div>
+			 	<div class="form-group">
+			    	<label for="exampleTagName">Usertag</label>
+			    	<input type="text" name="twitterName" class="form-control" id="registerTagName" aria-describedby="userTagHelp" placeholder="Enter user tag" required>
+			    	<small id="userTagHelp" class="form-text text-muted">What do you want for your tag name</small>
+			 	</div>
+				 <div class="form-group">
+			    <label for="exampleInputEmail1">Email address</label>
+			    <input type="email"  name="email"class="form-control" id="registerEmail" aria-describedby="emailHelp" placeholder="Enter email">
+			    <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+			  </div>
+			  <div class="form-group">
+			    <label for="exampleInputPassword1">Password</label>
+			    <input type="password"  name="password" class="form-control" id="registerPassword" placeholder="Password">
+			  </div>
+			 
+			  <button type="submit" class="btn btn-primary">Register</button>
+			  
+			</form>	
+    	</div>
+    </div>
+  </div>
+</div>
+
+<div class="row" style="background-color: 	#33B2FF; height:inherit;">
+	<div class="col-8" style=" background-image: url('/images/twitter4.jpg');background-repeat: no-repeat;background-size: contain;">
+		
+	</div>
+	<div class="col-4">
+		<div class="container" style="padding: 1%">
+	<div class="jumbotron">
+		<% if (typeof msg !== "undefined" ){%>
+		<div class="alert alert-danger" role="alert">
+		 	<p>
+				<%= msg %> 
+			<p>
+		</div>
+		
+		<% } %>
+	<div class="container">
+	<form action="/login" method="post">
+	  <div class="form-group">
+	  	<label for="exampleInputEmail">Email address</label>
+	    <input type="email" name="email"class="form-control" id="exampleInputEmail" aria-describedby="emailHelp" placeholder="Enter email">
+	    <small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+	  </div>
+	  <div class="form-group">
+	    <label for="exampleInputPassword">Password</label>
+	    <input type="password" name="password" class="form-control" id="exampleInputPassword" placeholder="Password">
+	  </div>
+	 <div class="row">
+	 	<div class="col-4">
+	 		<button type="submit" class="btn btn-primary">Login</button>		
+	 	</div>
+	 	<div class="col-4">
+	 		
+	 	</div>
+	 	<div class="col-4">
+	 		<div class="row">
+	 			<div class="col-12">
+	 				<a href=""  data-toggle="modal" data-target=".bd-example-modal-lg" style="text-align: right;">New user?</a>
+	 			</div>
+	 			<div class="col-12">
+	 				<a href="" style="text-align: right;">Forgot Password?</a>		
+	 			</div>
+	 			<div class="col-12">
+	 				<a href="" style="text-align: right;">Forgot Username?</a>				
+	 			</div>
+	 		</div>	 			  		
+	 	</div>
+	 </div>	  
+	</form>
+	</div>	
+	</div>	
+</div>
+	</div>
+</div>
+
+<script type="text/javascript">
+	$("#register-form").submit(function(event){
+		event.preventDefault();
+		var dataForm = {
+		username: $("#registerUserName").val().trim(),
+		email: $("#registerEmail").val().trim(),
+		password: $("#registerPassword").val().trim(),
+		twitterName: '@'+ $("#registerTagName").val().trim(),
+
+		}
+		$.ajax({
+			url:"/register",
+			data: dataForm,
+			method:'POST'
+		}).done(function(json){
+			var container = $("#fields-taken");
+
+			console.log(json);
+			if(json.code === 1){
+				container.empty()
+				for(var field in json.taken){
+					if(json.taken[field]){
+						console.log(field);
+						container.append(`<div class="alert alert-danger" role="alert">
+  <strong>${field}</strong> is already taken</div>`)
+					}
+				}
+			}
+			else if(json.code === 2){
+				container.empty()
+				container.append(`<div class="alert alert-danger" role="alert">${json.msg}</div>`)
+			}
+			else{
+				container.empty()
+				container.append(`<div class="alert alert-success" role="alert"><strong> Registration Successful</strong></div>`)
+			}
+
+		});		
+	});
+</script>
+
+<% include partials/footer%>

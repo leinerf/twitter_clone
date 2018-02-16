@@ -1,0 +1,99 @@
+body {
+
+}
+
+.user-icon{
+	margin-left:1%; 
+	padding: 15px; 
+	display: inline;
+	
+	border-radius: 100%; 
+	background-color: lightblue; 
+	cursor: pointer;
+	min-width: 162px;		
+}
+
+#container-prime{
+	padding: 1%;
+}
+
+#user-box{
+	cursor: pointer;
+}
+
+.blue-header-color{
+	background: #007bff;
+	color: white;
+}
+.myRounder{
+	/*height: 100%;*/
+	border-radius: 100%;
+}
+
+.row {
+	padding: 1%;
+}
+#user-icon{
+	color: rgba(0,0,0,.5);
+	cursor: pointer;
+	background-color: lightblue;
+	border-radius: 5px;
+
+}
+/*id="myModal" style="display:none;position: absolute;top:90%;background-color: white;z-index: 200; width: 20%;"*/
+#myModal{
+	display: none;
+	padding: 1%;
+	position: absolute;
+	top: 80%;
+	background: white;
+	z-index: 1000; 
+	width: 20%;
+}
+#myModal ul{
+	list-style: none;
+	padding: 0;
+}
+
+#myModal li.clickable:hover{
+	background-color: black;
+	color: white;
+}
+#myModal a{
+	color: rgba(0,0,0,.5);
+}
+
+#myModal a:hover{
+	color: white;
+	text-decoration: none;
+}
+#overlay{
+	width: 100%;
+	height: 100%;
+	position: absolute;
+
+}
+nav{
+	/*z-index: 400;*/
+}	
+#messageModal{
+	display: none;
+	margin-right:5%;
+	background:white;
+	position: absolute;
+	top: 10%; 
+	left: 25%;
+	height:50%;
+	width: 50%; 
+	z-index: 1000;
+}
+
+.discrete-button{
+	background: none;
+    color: inherit;
+    border: none;
+    padding: 0;
+    font: inherit;
+    cursor: pointer;
+    outline: inherit;
+}

@@ -1,0 +1,6 @@
+Create UI - done
+Create login and registration - done
+create tweets card - in progress 
+dynamically upload tweets from the backend
+follow people  - 
+Use socket.io for real time network connection 

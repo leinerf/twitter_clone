@@ -1,0 +1,294 @@
+<% include  partials/header.ejs %>
+<div class="container" id="container-prime">
+
+	<div class="container" >
+	  <div class="row" >
+	    <div class="col-lg-3 col-sm-12" id="user-box" >
+	      <div class="card bg-light mb-3" >
+		  <div class="card-header blue-header-color" style=""></div>
+		  <div class="card-body">
+		    
+		    <div class="row">
+		    	<div class=" col-12">
+		    		<div class="row">
+
+		    			<div class="col-12">
+		    				<h4 class="card-title" style="text-align: center"><%= locals.user.username%></h4>
+		    			</div>
+		    			<div class="col-12" style="text-align: center">
+		    				<h6 class="card-title" ><%= locals.user.twitterName%></h6>
+		    			</div>
+		    		</div>
+		    		
+		    	</div>
+		    	<div class="col-6">
+		    		<div class="row">
+			    		<div class="col-12">
+			    			<header>Tweets</header>
+			    		</div>
+			    		<div class="col-12">
+			    			<header id="tweetCount">0</header>
+			    		</div>
+		    		</div>	
+		    	</div>
+		    	<div class="col-6">
+		   			<div class="row">
+			    		<div class="col-12">
+			    			<header>Following</header>
+			    		</div>
+			    		<div class="col-12">
+			    			<header id="followingCount"><%= followingIds.length%></header>
+			    		</div>
+		    		</div>	
+		    	</div>
+		    </div>
+		   </p>
+		  </div>
+		</div>
+	    </div>
+	    <div class="col-lg-7">
+	    	<div class="card" style="padding: 1%;">
+	     		<form id="tweetForm">
+	     			<div class="form-group" >
+				    	
+				    	<textarea class="form-control" id="exampleFormControlTextarea1" rows="2"></textarea>
+				  	</div>
+				  	<div class="row">
+				  		<div class="col-6" >
+				  			
+				  		</div>
+				  		<div class="col-4">
+				  			
+				  		</div>
+				  		<div class="col-2" id="onClickButtons">
+				  			<button class="btn btn-primary mb-2" id="tweetButton">Submit</button>
+				  		</div>
+				  	</div>
+				  	
+	     		</form>
+			
+	     		
+			</div>
+			<div id="tweets">
+				
+			</div>
+	     	
+	    </div>
+	    <div class="col-2" id="follow" >
+
+					
+		</div>
+	    
+</div>
+
+<script type="text/javascript">
+
+
+	var getTweets = function(){
+		$.ajax({
+			url:"/users/<%= locals.user._id%>/tweets",
+			method:"GET"
+		}).done(function(json){
+			var tweetCount = document.getElementById("tweetCount");
+			tweetCount.textContent = json.length;
+			for(var i = 0; i<json.length;++i){
+				item = json[i];
+
+				var cardTemplate =  
+				`<div class="card bg-light mb-3" >
+			    		<div class="card-header blue-header-color" style=""></div>
+				<div class="card">
+		     		<div class="row">
+		     			<div class="card-body col-2" >
+		     				<img src="/images/doggo-1.jpg" class="img-fluid myRounder" alt="Responsive image " style="width: 100%" >
+		     			</div>
+			     		<div class="card-body col-10">
+				    		<p class="card-title"><strong>${item.author}</strong> <span style="color:lightgray; font-size: 0.8em">${item.date}</span></p>
+						    <p class="card-text">${item.text}</p>
+					    </div>	
+		     		</div>
+		     		
+				</div>
+			</div>`
+				$("#tweets").prepend(cardTemplate);
+			}
+		});
+	}
+	
+	var getFollowers = function(){
+	$.ajax({
+			url:"/users/<%= locals.user._id%>/followers",
+			method:"GET"
+		}).done(function(json){
+			
+			for(var i = 0; i < json.length; ++i){
+				item= json[i];
+		var followTemplate = `
+				<div class="card bg-light mb-3" >
+			    		<div class="card-header blue-header-color" style="" "></div>
+				  <div class="card-body">
+				    
+				    <div class="row">
+				    	<div class=" col-12">
+				    		<div class="row">
+
+				    			<div class="col-12">
+				    				<p class="card-title" style="text-align: center;font-size: 0.8em">		${item.username}
+				    				</p>
+				    			</div>
+				    			<div class="col-12" style="text-align: center;font-size: 0.8em">
+				    				<p class="card-title" >${item.twitterName}</p>
+				    			</div>
+				    			<div class="col-12">
+				    				<div class="row">
+				    					<div class="col-1"></div>
+				    					<div class="col-5">
+				    						<button data-id=${item._id} class="followButton btn btn-primary" type="submit" style="text-align: center;font-size: 0.8em">follow</button>		
+				    					</div>
+				    					<div class="col-6"></div>
+				    				</div>
+				    				
+				    			</div>
+
+				    		</div>
+				    		
+				    	</div>
+				    	
+				    </div>
+				   </p>
+				  </div>
+				</div>
+			    </div>`
+			    $("#follow").append(followTemplate);
+
+		}
+
+		})
+	}
+	var windowLoad = function(){
+		getTweets();
+		getFollowers();
+	}
+	$( document ).ready(function() {
+    	windowLoad();
+    	var socket = io('/<%=locals._id%>');;
+		socket.on("tweet", function(json){
+			var cardTemplate = 
+			`<div class="card bg-light mb-3" >
+			    		<div class="card-header blue-header-color" style=""></div>
+			<div class="card">
+		     		<div class="row">
+		     			<div class="card-body col-2" >
+		     				<img src="/images/doggo-1.jpg" class="img-fluid myRounder" alt="Responsive image " style="width: 100%" >
+		     			</div>
+				     		<div class="card-body col-10">
+					    		<p class="card-title"><strong>${json.author}</strong> <span style="color:lightgray; font-size: 0.8em">
+					    			${json.date}
+					    		</span></p>
+							    <p class="card-text">${json.text}</p>
+						    </div>	
+			     		</div>
+			     		
+					</div>`;
+					console.log("tweeting");
+			 		$("#tweets").prepend(cardTemplate);
+			 		var tweetCount = document.getElementById("tweetCount");
+			 		tweetCount.textContent = Number(tweetCount.textContent) + 1;
+			 		
+		});
+	
+	});
+
+
+</script>
+<script type="text/javascript">
+	
+		
+</script>
+
+<script type="text/javascript">
+	
+	var textInput = document.getElementById("exampleFormControlTextarea1");
+	// <button type="submit" class="btn btn-primary mb-2">Submit</button>
+	var tweetButton = document.getElementById("tweetButton");
+	tweetButton.style.display = "none"
+	$("#tweetForm").submit(function(event){
+		event.preventDefault();
+		console.log("tweetingh343");
+		var url = "/users/<%=locals.user._id%>/tweets"
+		var newtext = $("#exampleFormControlTextarea1").val().trim();
+
+		var dataForm = {
+			userId: "<%=locals.user._id%>",
+			text: newtext,
+			author: "<%=locals.user.username%>"
+			}
+	 	$.ajax({
+	 		url:url,
+	 		data: dataForm,
+	 		method:'POST'
+	 	}).done(function(json){
+	 		
+	 		var cardTemplate = `<div class="card">
+     		<div class="row">
+     			<div class="card-body col-2" >
+     				<img src="/images/doggo-1.jpg" class="img-fluid myRounder" alt="Responsive image " style="width: 100%" >
+     			</div>
+		     		<div class="card-body col-10">
+			    		<p class="card-title"><strong>${json.author}</strong> <span style="color:lightgray; font-size: 0.8em">
+			    			${json.date}
+			    		</span></p>
+					    <p class="card-text">${json.text}</p>
+				    </div>	
+	     		</div>
+	     		
+			</div>`;
+	 		$("#tweets").prepend(cardTemplate);
+	 	});
+
+	});		
+	textInput.addEventListener("click",function(){
+		
+		if(this.rows === 2){
+			this.rows = 5;
+			tweetButton.style.display = "block"
+	
+
+
+
+		}
+
+
+		else{
+			this.rows = 2;
+			tweetButton.style.display = "none"
+			
+			
+			
+		}
+	})
+	
+
+
+</script>
+<script type="text/javascript">
+	$("#follow").on("click","button.followButton",function(){
+		var button = $(this)
+		console.log(button.attr('data-id'));
+		var dataForm = {follow:button.attr('data-id')};
+		$.ajax({
+			url:"/users/<%=locals.user._id%>/followers",
+			data:dataForm,
+			method:"POST"
+		}).done(function(json){
+			button.parent().parent().parent().parent().parent().parent().parent().parent().remove();
+			var followingCount = document.getElementById("followingCount")
+			followingCount.textContent = Number(followingCount.textContent) + 1;
+			
+		});
+	})
+</script>
+    
+<% include partials/footer.ejs %>
+
+ 
