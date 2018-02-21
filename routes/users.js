@@ -4,7 +4,56 @@ var isAuthenticated  = require('../middleware/authentication');
 var tweetsModel = require("../models/tweetsModel");
 var userModel = require("../models/userModel");
 var io = require("../io");
+var cors = require('cors')
 
+router.post('/share',cors(),function(req,res,next){
+	console.log('it goes here share=============================')
+	console.log(req.body)
+	userModel.findOne({email: req.body.email},function(err,foundUser){
+		if(err){
+			res.json({authenticated:false})		
+		}
+		else if(foundUser === null || foundUser === undefined){
+			res.json({authenticated:false});
+		}
+		else{
+			if(foundUser.checkPassword(req.body.password)){
+				req.session.user = foundUser;
+				res.json({authenticated:true, user_id:foundUser._id,author: foundUser.twitterName});		
+			}
+			else{
+				res.json({authenticated:false});
+			}
+		}
+	})
+	
+	
+})
+
+router.post("/:id/tweets",cors(),function(req,res,next){
+	console.log("==============================tweets post========================")
+	console.log(req.body);
+	console.log("==============================tweets post========================")
+	tweetsModel.create(req.body,function(err,createdTweet){
+		if(err){
+			res.json(err)
+		}
+		else{
+			var user;
+			if(req && req.user && req.user._id){
+				user = req.user._id
+			}
+			else{
+				user = req.body.userId;
+			}
+			
+			console.log("it goes here");
+			io.instance().sockets.in(user).emit("tweet",createdTweet);
+			res.json(createdTweet)
+		}
+	})
+	
+});
 
 router.use(isAuthenticated);
 
@@ -29,19 +78,6 @@ router.get('/:id/profile/', function(req, res, next) {
 });
 
 
-router.post("/:id/tweets",function(req,res,next){
-	tweetsModel.create(req.body,function(err,createdTweet){
-		if(err){
-			res.json(err)
-		}
-		else{
-
-			io.instance().sockets.in(req.user._id).emit("tweet",createdTweet);
-			res.json(createdTweet)
-		}
-	})
-	
-});
 
 router.get("/:id/tweets",function(req,res,next){
 	userModel.findById(req.params.id,function(err,foundUser){
