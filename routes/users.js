@@ -36,7 +36,7 @@ router.post("/:id/tweets",function(req,res,next){
 		}
 		else{
 
-			io.instance().to(req.user._id).emit("tweet",createdTweet);
+			io.instance().sockets.in(req.user._id).emit("tweet",createdTweet);
 			res.json(createdTweet)
 		}
 	})
@@ -127,6 +127,7 @@ router.get("/:id/nonfollowers",function(req,res,next){
 
 
 router.post("/:id/followers",function(req,res,next){
+		console.log(req.body.follow);
 		userModel.findById(req.user._id, function(err,foundUser){
 		if(err){
 			res.json(err);
@@ -144,8 +145,20 @@ router.post("/:id/followers",function(req,res,next){
 					res.json(err);
 				}
 				else{
+					console.log('=============following post self============')
+					console.log(req.user._id)
+					console.log('=============following post============')
+					console.log(req.body.follow)
+					console.log('=============following post============')
 					io.this_socket.join(req.body.follow);
-					res.json(foundUser);
+					userModel.findById(req.body.follow,function(err, foundUser){
+						if(err){
+							return res.json(err);
+						}
+						console.log(foundUser)
+						console.log("hello from post");
+						return res.json(foundUser);
+					})
 				}
 			});
 		}
@@ -172,8 +185,17 @@ router.post("/:id/unfollow",function(req,res,next){
 					return res.json(err);
 				}
 				else{
-					//io.this_socket.leave(req.body.unfollow_id);
-					return res.json(foundUser);
+					console.log('=============unfollowing post============')
+					console.log(req.body.unfollow_id)
+					console.log('=============unfollowing post============')
+					io.this_socket.leave(req.body.unfollow_id);
+					userModel.findById(req.body.unfollow_id,function(err,foundUser){
+						if(err){
+							return res.json(err);
+						}
+						return res.json(foundUser);
+					})
+					
 				}
 			})
 		}
