@@ -117,7 +117,7 @@
 	
 	var getFollowers = function(){
 	$.ajax({
-			url:"/users/<%= locals.user._id%>/followers",
+			url:"/users/<%= locals.user._id%>/nonfollowers",
 			method:"GET"
 		}).done(function(json){
 			
@@ -171,7 +171,7 @@
 	}
 	$( document ).ready(function() {
     	windowLoad();
-    	var socket = io('/<%=locals._id%>');;
+    	var socket = io();
 		socket.on("tweet", function(json){
 			var cardTemplate = 
 			`<div class="card bg-light mb-3" >
@@ -284,7 +284,23 @@
 			button.parent().parent().parent().parent().parent().parent().parent().parent().remove();
 			var followingCount = document.getElementById("followingCount")
 			followingCount.textContent = Number(followingCount.textContent) + 1;
-			
+			$("#follow-body").prepend(`<div class="card" style="padding:5%;">
+              <div class="card-block">
+                <div class="row">
+                  <div class="col-4">
+                    <h6 class="card-title">${json.twitterName}</h6>
+                  </div>
+                  <div class="col-4">
+
+                  </div>
+                  <div class="col-4">
+                    <button type="button" data-id="${json._id}"class="unfollow-btn btn btn-danger" style="position:inline">unfollow</button>
+                  </div>
+                  
+                  
+                </div>
+              </div>
+            </div>`);
 		});
 	})
 </script>

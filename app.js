@@ -5,6 +5,8 @@ var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var io = require("./io");
+var config = require('./config');
+
 //for recording user session 
 var session = require('client-sessions');
 
@@ -45,12 +47,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 
-app.use(session({
-	cookieName: "session",
-	secret: "dOyUoKnOwThEwAy",
-	duration: 30 * 6 * 1000,
-	activateDuration: 5 * 60 * 1000
-}))
+
+app.use(session(config))
 
 
 app.use(function(req, res, next){ 

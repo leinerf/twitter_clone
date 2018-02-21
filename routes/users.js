@@ -15,7 +15,9 @@ router.get('/:id/', function(req, res, next) {
 			res.json(err)
 		}
 		else{
-			
+			if(foundUser === null || foundUser === undefined){
+				return res.redirect('/');
+			}
 			res.render("userFeed",{followingIds:foundUser.followingIds});
 		}
 	})
@@ -33,9 +35,8 @@ router.post("/:id/tweets",function(req,res,next){
 			res.json(err)
 		}
 		else{
-			console.log(req.user._id)
-			var nsp = io.instance().of("/" +req.user._id);
-			io.instance().to("/" +req.user._id).emit("tweet",createdTweet);
+
+			io.instance().to(req.user._id).emit("tweet",createdTweet);
 			res.json(createdTweet)
 		}
 	})
@@ -43,22 +44,61 @@ router.post("/:id/tweets",function(req,res,next){
 });
 
 router.get("/:id/tweets",function(req,res,next){
-	
-	var listOfIds = req.user.followingIds.slice();
-	listOfIds.push(req.params.id);
-	tweetsModel.find({userId: {$in: listOfIds}},function(err,foundUsers){
-		
+	userModel.findById(req.params.id,function(err,foundUser){
 		if(err){
 			res.json(err);
 		}
 		else{
+			var listOfIds = foundUser.followingIds.slice();
+			listOfIds.push(req.params.id);
 			
-			res.json(foundUsers);
+			tweetsModel.find({userId: {$in: listOfIds}},function(err,foundUsers){
+				
+				if(err){
+					res.json(err);
+				}
+				else{
+					
+					res.json(foundUsers);
+				}
+			});
 		}
 	});
+
+	
+		
 })
 
 router.get("/:id/followers",function(req,res,next){
+	var id = req.params.id
+
+
+	userModel.findById(id,function(err,foundUser){
+		if(err){
+			res.json(err)
+		}
+		else if(foundUser === undefined || foundUser === null){
+			res.json({msg:"could not find user"});
+		}
+		else{
+			var restrictions = foundUser.followingIds.slice();
+			restrictions;
+			userModel.find({ _id:{ "$in": restrictions } },function(err,foundUsers){
+				if(err){
+					res.json(err);
+				}
+				else{
+					res.json(foundUsers)
+				}
+			}); // `query` is an instance of `Query`
+		}
+	})
+
+});
+
+
+
+router.get("/:id/nonfollowers",function(req,res,next){
 	var id = req.params.id
 
 
@@ -85,6 +125,7 @@ router.get("/:id/followers",function(req,res,next){
 
 });
 
+
 router.post("/:id/followers",function(req,res,next){
 		userModel.findById(req.user._id, function(err,foundUser){
 		if(err){
@@ -103,13 +144,7 @@ router.post("/:id/followers",function(req,res,next){
 					res.json(err);
 				}
 				else{
-					io.instance().on("connection",function(socket){
-						socket.join(req.user._id);
-						for(var i = 0; i < foundUser.followingIds; ++i ){
-							socket.join(foundUser.followingIds[i]);
-						}
-					})
-
+					io.this_socket.join(req.body.follow);
 					res.json(foundUser);
 				}
 			});
@@ -119,6 +154,31 @@ router.post("/:id/followers",function(req,res,next){
 
 });
 
+router.post("/:id/unfollow",function(req,res,next){
+	userModel.findById(req.body._id,function(err,foundUser){
+		if(err){
+			
+			res.json(err);
+		}else{
+			function remove(arr, element){
+				return arr.filter(function(elem){
+					return elem !== element;
+				})
+			}
+
+			foundUser.followingIds = remove(foundUser.followingIds,req.body.unfollow_id);
+			foundUser.save(function(err){
+				if(err){
+					return res.json(err);
+				}
+				else{
+					//io.this_socket.leave(req.body.unfollow_id);
+					return res.json(foundUser);
+				}
+			})
+		}
+	});
+});
 
 
 

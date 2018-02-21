@@ -28,6 +28,9 @@
       <li class="nav-item">
         <a class="nav-link" href="#" id="messageButton">Messages </a>
       </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#" id="followButton">Following</a>
+      </li>
     </ul>
 
     <span class="nav-link"  id="user-icon">
@@ -71,14 +74,56 @@
     
   </div>
 </div>
+<div class="card bg-light mb-3" id="followModal">
+    <div class="card-header">Following</div>
+  <div class="card-body" id="follow-body">
+    
+  </div>
+</div>
+<script type="text/javascript">
+  var loadFollowers = function(){
+          $.ajax({
+            method: "GET",
+            url:"/users/<%= locals.user._id%>/followers"
+          }).done(function(json){
+            console.log(json);
+            for(var i = 0; i < json.length; ++i){
+              console.log(json[i])
+
+              $("#follow-body").prepend(`<div class="card" style="padding:5%;">
+              <div class="card-block">
+                <div class="row">
+                  <div class="col-4">
+                    <h6 class="card-title">${json[i].twitterName}</h6>
+                  </div>
+                  <div class="col-4">
+
+                  </div>
+                  <div class="col-4">
+                    <button type="button" data-id="${json[i]._id}"class="unfollow-btn btn btn-danger" style="position:inline">unfollow</button>
+                  </div>
+                  
+                  
+                </div>
+              </div>
+            </div>`);
+            }
+          })
+  }
+  window.onload = loadFollowers;
+</script>
 <script type="text/javascript">
   var user = document.getElementById("user-icon");
   var message = document.getElementById("messageButton");
+  var follow = document.getElementById("followButton");
   // var overlay = document.getElementById("overlay");
   var userTabOpen = false;
   var messageTabOpen = false;
+  var followTabOpen = false;
   var userModal = document.getElementById("myModal");
   var messageModal = document.getElementById("messageModal");
+  var followModal = document.getElementById("followModal");
+
   user.addEventListener("click",function(){
     console.log("clicked user");
     if(!userTabOpen){
@@ -108,10 +153,32 @@
       messageTabOpen = false; 
     }
   })
- 
-
-  
-  
-
-  
+  follow.addEventListener("click",function(){
+    console.log("clicked  message");
+    if(!followTabOpen){
+      followModal.style.display = "block";
+      followTabOpen = true;
+    }
+    else{
+      followModal.style.display = "none";
+      followTabOpen = false; 
+    }
+  })
+</script>
+<script type="text/javascript">
+  $("#followModal").on("click","button.unfollow-btn",function(){
+    var button = $(this);
+    formData = {
+      unfollow_id: button.attr('data-id'),
+      _id: "<%=locals.user._id%>"
+    };
+    $.ajax({
+      method:'POST',
+      url: "/users/<%= locals.user._id%>/unfollow",
+      data: formData
+    }).done(function(json){
+      console.log(json);
+      button.parent().parent().parent().parent().remove();
+    })   
+  })
 </script>
